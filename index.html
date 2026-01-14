@@ -1,0 +1,341 @@
+
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedro & Júlia - Mariage de Prestige</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Great+Vibes&family=Montserrat:wght@200;300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sage: #acc6aa;
+            --dark-sage: #8fa68d;
+            --cream: #fdfaf5;
+            --gold: #c5a059;
+            --champagne: #f7e7ce;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--cream);
+            color: #3e4d3f;
+            overflow-x: hidden;
+        }
+
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-cursive { font-family: 'Great Vibes', cursive; }
+
+        .paper-texture {
+            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+        }
+
+        .envelope-wrapper { perspective: 2000px; }
+
+        .envelope {
+            position: relative;
+            width: 340px;
+            height: 230px;
+            background: var(--dark-sage);
+            box-shadow: 0 40px 60px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 4px;
+        }
+
+        .envelope:hover { transform: translateY(-10px) rotateX(5deg); }
+
+        .flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 170px solid transparent;
+            border-right: 170px solid transparent;
+            border-top: 130px solid var(--sage);
+            transform-origin: top;
+            transition: transform 1s ease-in-out;
+            z-index: 4;
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));
+        }
+
+        .flap::after {
+            content: '';
+            position: absolute;
+            top: -132px;
+            left: -170px;
+            width: 340px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .envelope.opened .flap { transform: rotateX(180deg); z-index: 1; }
+
+        .letter {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            height: 90%;
+            background: white;
+            padding: 30px 20px;
+            text-align: center;
+            transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 2;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+        }
+
+        .envelope.opened .letter { transform: translate(-50%, -150px); z-index: 5; }
+
+        .wax-seal {
+            position: absolute;
+            top: 105px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle, #e6d5c3 0%, #d4bda1 100%);
+            border-radius: 50%;
+            z-index: 6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2), inset 0 0 10px rgba(255,255,255,0.3);
+            transition: all 0.5s ease;
+        }
+
+        .opened .wax-seal { opacity: 0; transform: translateX(-50%) scale(1.2); pointer-events: none; }
+
+        .petal {
+            position: fixed;
+            background-color: #fff;
+            border-radius: 150% 0 150% 0;
+            z-index: -1;
+            opacity: 0.3;
+            pointer-events: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); }
+            100% { transform: translateY(110vh) rotate(360deg); }
+        }
+
+        #main-content { display: none; opacity: 0; }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        .gold-underline {
+            background: linear-gradient(to right, transparent, var(--gold), transparent);
+            height: 1px;
+            width: 120px;
+            margin: 1.5rem auto;
+        }
+
+        .parallax-container { overflow: hidden; position: relative; }
+        .parallax-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 130%;
+            object-fit: cover;
+            will-change: transform;
+        }
+
+        /* Styles Spécifiques Histoire */
+        .story-image-wrapper {
+            position: relative;
+            padding: 1rem;
+        }
+        .story-image-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 1px solid var(--gold);
+            opacity: 0.3;
+            transform: translate(20px, 20px);
+            z-index: 0;
+            border-radius: 2rem;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+</head>
+<body class="paper-texture">
+
+    <!-- Écran de l'Enveloppe -->
+    <div id="envelope-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#e0eadd] transition-all duration-1000">
+        <div class="envelope-wrapper" onclick="handleEnvelopeOpen()">
+            <div id="envelope-el" class="envelope">
+                <div class="flap"></div>
+                <div class="letter">
+                    <p class="text-[9px] uppercase tracking-[5px] text-[#c5a059] mb-3">Invitation de Mariage</p>
+                    <h2 class="font-cursive text-4xl text-[#4a5d4d]">Pedro & Júlia</h2>
+                    <div class="gold-underline !w-12 !my-4"></div>
+                    <p class="text-[11px] font-serif italic text-gray-500">Une journée d'exception</p>
+                    <p class="text-[10px] tracking-[2px] mt-4 text-[#acc6aa]">9 MAI 2026</p>
+                </div>
+                <div class="wax-seal">
+                    <span class="font-cursive text-2xl text-[#8fa68d] select-none">P&J</span>
+                </div>
+            </div>
+        </div>
+        <div class="mt-20 text-center">
+            <p id="instruction" class="font-serif italic text-[#4a5d4d] text-lg animate-pulse">Ouvrez l'invitation...</p>
+        </div>
+    </div>
+
+    <!-- Contenu Principal -->
+    <main id="main-content">
+        <header id="hero" class="parallax-container relative h-[110vh] flex items-center justify-center text-center">
+            <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1920&q=80" 
+                 class="parallax-img" id="hero-bg" alt="Wedding">
+            <div class="absolute inset-0 bg-black/30 z-[1]"></div>
+            <div class="relative z-10 text-white space-y-4 px-4">
+                <p class="text-xs uppercase tracking-[12px] opacity-80">L'union de deux âmes</p>
+                <h1 class="font-cursive text-8xl md:text-[11rem] drop-shadow-2xl">Pedro & Júlia</h1>
+                <div class="w-32 h-px bg-white/40 mx-auto"></div>
+                <p class="font-serif text-2xl md:text-4xl tracking-[10px]">09 . 05 . 2026</p>
+            </div>
+        </header>
+
+        <!-- Section Notre Histoire (Narrative) -->
+        <section class="py-32 px-6 bg-white overflow-hidden">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-32 reveal">
+                    <span class="text-gold uppercase tracking-[6px] text-xs">Leur Voyage</span>
+                    <h2 class="font-serif italic text-5xl md:text-7xl mt-4 text-[#4a5d4d]">Notre Histoire</h2>
+                    <div class="gold-underline"></div>
+                </div>
+
+                <!-- Chapitre 1 -->
+                <div class="flex flex-col md:flex-row items-center gap-16 md:gap-32 mb-48 reveal">
+                    <div class="w-full md:w-1/2 story-image-wrapper">
+                        <div class="relative overflow-hidden rounded-[2rem] shadow-2xl z-10 aspect-[4/5] parallax-container">
+                            <img src="https://images.unsplash.com/photo-1516589174184-c68526614fd5?auto=format&fit=crop&w=1200&q=80" 
+                                 class="parallax-img" alt="Rencontre">
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 space-y-8">
+                        <span class="font-serif italic text-gold text-2xl">L'Étincelle</span>
+                        <h3 class="text-4xl font-serif text-[#4a5d4d]">Un regard à Séville</h3>
+                        <p class="text-gray-600 leading-relaxed font-light text-xl italic">
+                            "Tout a commencé lors d'un doux après-midi d'automne. Un simple café échangé sous les orangers en fleurs, un rire partagé... et soudain, le temps s'est arrêté."
+                        </p>
+                        <p class="text-gray-500 leading-relaxed font-light text-lg">
+                            Ce n'était pas un hasard, mais le destin. Depuis ce jour, chaque ruelle de Séville garde le secret de nos premiers aveux.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Chapitre 2 -->
+                <div class="flex flex-col md:flex-row-reverse items-center gap-16 md:gap-32 mb-48 reveal">
+                    <div class="w-full md:w-1/2 story-image-wrapper">
+                        <div class="relative overflow-hidden rounded-[2rem] shadow-2xl z-10 aspect-[4/5] parallax-container">
+                            <img src="https://images.unsplash.com/photo-1522673607200-1648832cee98?auto=format&fit=crop&w=1200&q=80" 
+                                 class="parallax-img" alt="Voyages">
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 text-right space-y-8">
+                        <span class="font-serif italic text-gold text-2xl">L'Aventure</span>
+                        <h3 class="text-4xl font-serif text-[#4a5d4d]">Deux cœurs, un chemin</h3>
+                        <p class="text-gray-600 leading-relaxed font-light text-xl italic">
+                            "Des sommets enneigés aux plages infinies, nous avons appris que l'aventure n'est pas la destination, mais la personne qui marche à nos côtés."
+                        </p>
+                        <p class="text-gray-500 leading-relaxed font-light text-lg">
+                            Chaque tampon sur nos passeports raconte un chapitre de notre complicité grandissante.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Chapitre 3 -->
+                <div class="flex flex-col md:flex-row items-center gap-16 md:gap-32 reveal">
+                    <div class="w-full md:w-1/2 story-image-wrapper">
+                        <div class="relative overflow-hidden rounded-[2rem] shadow-2xl z-10 aspect-[4/5] parallax-container">
+                            <img src="https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=1200&q=80" 
+                                 class="parallax-img" alt="Demande">
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 space-y-8">
+                        <span class="font-serif italic text-gold text-2xl">La Promesse</span>
+                        <h3 class="text-4xl font-serif text-[#4a5d4d]">Le Grand "Oui"</h3>
+                        <p class="text-gray-600 leading-relaxed font-light text-xl italic">
+                            "Sous un ciel étoilé, la question la plus importante a trouvé sa réponse la plus douce."
+                        </p>
+                        <p class="text-gray-500 leading-relaxed font-light text-lg">
+                            Aujourd'hui, nous tournons la page vers notre plus belle aventure : la vie à deux, pour l'éternité.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Galerie & Countdown & RSVP -->
+        <section class="py-32 bg-[#f9f4ee] reveal overflow-hidden">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="text-center mb-20">
+                    <h2 class="font-serif italic text-5xl mb-4 text-[#8fa68d]">Instants Précieux</h2>
+                    <div class="gold-underline !w-24"></div>
+                </div>
+                <!-- Carousel logic exists in JS -->
+                <div class="relative overflow-hidden rounded-[3rem] shadow-2xl bg-white p-4">
+                    <div id="carousel-track" class="flex transition-transform duration-1000">
+                        <div class="min-w-full px-2">
+                             <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=1200&q=80" class="rounded-2xl w-full h-[600px] object-cover" alt="1">
+                        </div>
+                        <div class="min-w-full px-2">
+                             <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80" class="rounded-2xl w-full h-[600px] object-cover" alt="2">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-24 bg-white text-center reveal">
+            <h2 class="font-serif italic text-3xl mb-12 text-gold">Jours restants</h2>
+            <div id="countdown" class="flex flex-wrap justify-center gap-6"></div>
+        </section>
+
+        <section id="rsvp" class="py-32 px-6 bg-cream">
+            <div class="max-w-3xl mx-auto text-center reveal">
+                <h2 class="font-serif italic text-5xl mb-12 text-[#4a5d4d]">Répondre à l'invitation</h2>
+                <form class="bg-white p-12 rounded-[3rem] shadow-xl space-y-8" onsubmit="event.preventDefault(); handleRSVP();">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <input type="text" placeholder="Votre Nom" class="w-full px-8 py-5 bg-gray-50 rounded-full outline-none focus:ring-1 focus:ring-gold text-sm">
+                        <select class="w-full px-8 py-5 bg-gray-50 rounded-full outline-none focus:ring-1 focus:ring-gold text-sm appearance-none">
+                            <option>Présence confirmée</option>
+                            <option>Hélas, absent(e)</option>
+                        </select>
+                    </div>
+                    <textarea placeholder="Un mot pour nous ?" class="w-full px-8 py-5 bg-gray-50 rounded-[2rem] outline-none focus:ring-1 focus:ring-gold text-sm h-40"></textarea>
+                    <button type="submit" class="w-full py-6 bg-[#4a5d4d] text-white rounded-full font-bold tracking-[5px] text-xs hover:bg-gold transition-all">CONFIRMER</button>
+                </form>
+            </div>
+        </section>
+
+        <footer class="py-20 text-center bg-white border-t border-gray-100">
+            <h3 class="font-cursive text-5xl text-sage mb-4">Pedro & Júlia</h3>
+            <p class="text-gray-400 text-[10px] tracking-[8px] uppercase">L'amour est le seul voyage qui ne finit jamais</p>
+        </footer>
+    </main>
+
+    <script src="index.js"></script>
+</body>
+</html>
